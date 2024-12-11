@@ -6,12 +6,17 @@ public class ChainLightingControllerInspector : Editor
 {
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
-        
         ChainLightningController controller = (ChainLightningController)target;
 
-        if (GUILayout.Button("Update Chain Lighting"))
+        if (GUILayout.Button("Update Chain Lighting (MST)"))
         {
+            controller.TrySpawnTreeLightning();
+            controller.TriggerLightning();
+        }
+
+        if (GUILayout.Button("Update Chain Lighting (Target Sequence)"))
+        {
+            controller.TrySpawnLightning();
             controller.TriggerLightning();
         }
 
@@ -19,5 +24,7 @@ public class ChainLightingControllerInspector : Editor
         {
             controller.ResetLighting();
         }
+        
+        base.OnInspectorGUI();
     }
 }

@@ -14,13 +14,13 @@ public class TransformEdgeGenerator<T> : GraphEdgeGenerator<Transform, T>
         this.edgeGenerator = edgeGenerator;
     }
     
-    public float GenerateEdgeWeight(GraphMatrix<Transform, T> matrix, int i, int j)
+    public float GenerateEdgeWeight(Transform[] v, int i, int j)
     {
-        return Vector3.Distance(matrix[i].position, matrix[j].position);
+        return Vector3.Distance(v[i].position, v[j].position);
     }
 
-    public T GenerateEdgeValue(GraphMatrix<Transform, T> matrix, int i, int j)
+    public T GenerateEdgeValue(Transform[] v, int i, int j)
     {
-        return edgeGenerator(matrix[i], matrix[j]);
+        return edgeGenerator(v[i], v[j]);
     }
 }

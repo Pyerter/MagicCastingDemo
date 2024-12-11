@@ -1,6 +1,8 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
+// Represents an edge in a graph, storing the index from and to for the vertex
+// and stores the weight and edge value, according to type parameter R.
 public class GraphEdge <R>
 {
     protected float _weight;
