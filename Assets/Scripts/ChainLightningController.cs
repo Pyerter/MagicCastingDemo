@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Algorithms;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -16,7 +17,7 @@ public class ChainLightningController : MonoBehaviour
     [SerializeField] protected float startTime = 0;
     [SerializeField] protected bool completed = false;
     [SerializeField] protected int maximumVFX = 100;
-        
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -27,7 +28,56 @@ public class ChainLightningController : MonoBehaviour
     {
         if (!completed && startTime + delayEffect > Time.time)
         {
-            TrySpawnLightning();
+            TrySpawnTreeLightning();
+        }
+    }
+
+    public void TrySpawnTreeLightning()
+    {
+        if (completed) return;
+        completed = true;
+        Transform[] targets = new Transform[targetChain.Count + 1];
+        targets[0] = sourceChain;
+        for (int i = 0; i < targetChain.Count; i++)
+        {
+            targets[i] = targetChain[i];
+        }
+        GraphMatrix<Transform, bool> graph = new GraphMatrix<Transform, bool>(targets, new TransformEdgeGenerator<bool>((t1, t2) => false));
+        bool[,] tree = PrimsAlgorithm.MST(graph, 0);
+        for (int i = 0; i < tree.GetLength(0); i++)
+        {
+            for (int j = 0; j < tree.GetLength(1); j++)
+            {
+                if (tree[i, j])
+                {
+                    SpawnLightingFromTo(targets[i].position, targets[j].position);
+                }
+            }
+        }
+        
+        TriggerLightning();
+    }
+
+    public void SpawnLightingFromTo(Vector3 position, Vector3 targetPosition)
+    {
+        for (int i = 0; i < maximumVFX; i++)
+        {
+            VisualEffect visualEffect = Instantiate(lightningTemplate, targetParent);
+            lightningEffects.Add(visualEffect);
+            visualEffect.transform.position = position;
+            visualEffect.gameObject.SetActive(true);
+            visualEffect.transform.LookAt(targetPosition);
+            
+            // Exit early if close enoygh
+            if (Vector3.Distance(position, targetPosition) <= lightningLength)
+                break;
+            
+            // Move position towards
+            position = Vector3.MoveTowards(position, targetPosition, lightningLength);
+            if (Vector3.Distance(position, targetPosition) <= lightningLength)
+            {
+                position = targetPosition + (Vector3.Normalize(position - targetPosition) * (lightningLength - 0.01f));
+            }
         }
     }
 
@@ -74,7 +124,7 @@ public class ChainLightningController : MonoBehaviour
 
     public void TriggerLightning()
     {
-        if (!completed) TrySpawnLightning();
+        if (!completed) TrySpawnTreeLightning();
         foreach (VisualEffect visualEffect in lightningEffects)
         {
             visualEffect.Play();
