@@ -77,6 +77,9 @@ public class ChainLightningController : MonoBehaviour
             visualEffect.transform.position = position;
             visualEffect.gameObject.SetActive(true);
             visualEffect.transform.LookAt(targetPosition);
+            // Calculate Y cutoff for lightning as it approaches its target
+            float distToTarget = Vector3.Distance(position, targetPosition) / lightningLength;
+            visualEffect.SetFloat("YCutoff", distToTarget);
             
             // Exit early if close enoygh
             if (Vector3.Distance(position, targetPosition) <= lightningLength)
@@ -84,11 +87,6 @@ public class ChainLightningController : MonoBehaviour
             
             // Move position towards
             position = Vector3.MoveTowards(position, targetPosition, lightningLength);
-            if (Vector3.Distance(position, targetPosition) <= lightningLength)
-            {
-                // move just under the distance away from the target
-                position = targetPosition + (Vector3.Normalize(position - targetPosition) * (lightningLength - 0.01f));
-            }
         }
     }
 
